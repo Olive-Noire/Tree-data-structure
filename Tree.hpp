@@ -4,6 +4,7 @@
 #include <cassert>
 #include <memory>
 #include <vector>
+#include <stack>
 
 template <typename Type> class Tree {
 
@@ -30,11 +31,14 @@ template <typename Type> class Tree {
         } else if (unique) {
             
             childrens.push_back(Tree{t});
+            childrens.back().parent = std::unique_ptr<Tree>{this};
+
             unique = false;
 
         } else {
 
             childrens.push_back(Tree{t});
+            childrens.back().parent = std::unique_ptr<Tree>{this};
 
         }
 
@@ -61,6 +65,50 @@ template <typename Type> class Tree {
 
     }
 
+    template <typename Lambda> void ForEach(Lambda function) {
+
+        function(value);
+        for (Tree &t : childrens) t.ForEach(function);
+
+    }
+
+    template <typename Lambda> void ForEach(Lambda function) const {
+
+        function(value);
+        for (Tree t : childrens) t.ForEach(function);
+
+    }
+
+    template <typename Lambda> void ForEachWidth(Lambda function) const {
+
+        std::stack<Tree> current;
+        std::vector<Tree> nexts;
+
+        function(value);
+        current.push(*this);
+
+        do {
+
+            while (!nexts.empty()) {
+
+                function(nexts[0].value);
+
+                current.push(nexts[0]);
+                nexts.erase(nexts.begin());
+
+            }
+
+            while (!current.empty()) {
+
+                for (Tree c : current.top().childrens) nexts.push_back(c);
+                current.pop();
+
+            }
+
+        } while (!nexts.empty());
+
+    }
+
     bool Empty() const { return !unique && childrens.empty() && parent == nullptr; }
     bool Leaf() const { return childrens.empty() && parent != nullptr; }
     bool Root() const { return !childrens.empty() && parent == nullptr; }
@@ -72,13 +120,9 @@ template <typename Type> class Tree {
 
             return 0;
 
-        } else if (unique) {
-
-            return 1;
-
         } else {
 
-            std::size_t count{childrens.size()};
+            std::size_t count{1};
             for (Tree t : childrens) count += t.Size();
 
             return count;
@@ -87,8 +131,86 @@ template <typename Type> class Tree {
 
     }
 
+    std::size_t Height() const {
+
+        if (Empty()) {
+
+            return 0;
+
+        } else {
+
+            std::size_t best{0};
+            for (Tree t : childrens) {
+
+                if (t.Height() > best) best = t.Height();
+
+            }
+
+            return 1+best;
+
+        }
+
+    }
+
+    std::size_t Generation() const {
+
+        if (Empty()) {
+
+            return 0;
+
+        } else {
+
+            std::size_t count{1};
+            Tree t{*this};
+
+            while (t.parent != nullptr) {
+
+                count++;
+                t = *t.parent;
+
+            }
+
+            return count;
+
+        }
+
+
+    }
+
     Type Get() const { return value; }
     Type& Get() { return value; }
+
+    template<typename Lambda> Type GetMost(Lambda comparison) const {
+
+        Type m{value};
+        ForEach([comparison, &m](Type t) -> void {
+
+            if (comparison(t, m)) m = t;
+
+        });
+
+        return m;
+
+    }
+
+    friend std::vector<Type> MakeVector(const Tree<Type> &t) {
+
+        std::vector<Type> result;
+
+        for (Tree c : t.childrens) {
+
+            for (Type v : MakeVector(c)) {
+
+                result.push_back(v);
+
+            }
+
+        }
+        
+        result.insert(result.begin(), t.value);
+        return result;
+
+    }
 
     const Tree& operator[](std::size_t index) const { return childrens[index]; }
     Tree& operator[](std::size_t index) { return childrens[index]; }
