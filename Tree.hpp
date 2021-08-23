@@ -83,30 +83,12 @@ template <typename Type> class Tree {
         std::queue<Tree> order;
         order.push(*this);
 
-        std::size_t distance{0}, count{1};
-
         while (!order.empty()) {
 
-            std::cout << "\nvaleur : " << order.front().value << "\ndistance : " << distance << std::endl;
-
             function(order.front().value);
-            for (Tree t : order.front().childrens) {
-                
-                order.push(t);
-
-            }
-
-            std::size_t temp{order.front().childrens.size()};
+            for (Tree t : order.front().childrens) order.push(t);
 
             order.pop();
-            count--;
-
-            if (count == 0) {
-
-                distance++;
-                count = temp;
-
-            }
 
         }
 
