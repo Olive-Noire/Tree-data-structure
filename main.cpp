@@ -39,6 +39,10 @@ int main() {
     test.ForEachGeneration([](int i) -> void { std::cout << i << ' '; }, test.Height()-1);
     std::cout << std::endl;
 
+    std::cout << "\nVoici l'arbre en chaine de caracteres : \n" << MakeString(test) << std::endl;
+
+    std::cout << "\nVoici la representation de l'arbre : \n" << test;
+
     std::cin.get();
 
     return 0;

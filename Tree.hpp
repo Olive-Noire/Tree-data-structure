@@ -1,6 +1,7 @@
 #ifndef DEF_TREE_HPP
 #define DEF_TREE_HPP
 
+#include <iostream>
 #include <cassert>
 #include <memory>
 #include <queue>
@@ -20,45 +21,72 @@ template <typename Type> class Tree {
 
     void Clear() { *this = Tree{}; }
 
-    void Push(Type t) {
+    void Push(Type t, std::size_t repeat = 1) {
 
-        if (Empty()) {
+        for (std::size_t i{0}; i < repeat; i++) {
+
+            if (Empty()) {
             
-            value = t;
-            unique = true;
+                value = t;
+                unique = true;
 
-        } else if (unique) {
+            } else if (unique) {
             
-            childrens.push_back(Tree{t});
-            childrens.back().parent = std::unique_ptr<Tree>{this};
+                childrens.push_back(Tree{t});
+                childrens.back().parent = std::unique_ptr<Tree>{this};
 
-            unique = false;
+                unique = false;
 
-        } else {
+            } else {
 
-            childrens.push_back(Tree{t});
-            childrens.back().parent = std::unique_ptr<Tree>{this};
+                childrens.push_back(Tree{t});
+                childrens.back().parent = std::unique_ptr<Tree>{this};
+
+            }
 
         }
 
     }
 
-    void Pop() {
+    void Pop(std::size_t repeat = 1) {
 
         assert(!Empty() && "Can't pop empty tree");
 
-        if (Size() == 1) {
+        for (std::size_t i{0}; i < repeat; i++) {
 
-            Clear();
+            if (Size() == 1) {
 
-        } else if (Size() == 2) {
+                Clear();
 
-            childrens.pop_back();
-            unique = true;
+            } else if (Size() == 2) {
+
+                childrens.pop_back();
+                unique = true;
+
+            } else {
+
+                childrens.pop_back();
+
+            }
+
+        }
+
+    }
+
+    void Add(Tree t) {
+
+        if (Empty()) {
+
+            *this = t;
+
+        } else if (unique) {
+
+            childrens.push_back(t);
+            unique = false;
 
         } else {
 
-            childrens.pop_back();
+            childrens.push_back(t);
 
         }
 
@@ -325,6 +353,45 @@ template <typename Type> class Tree {
 
     }
 
+    friend std::string MakeString(const Tree<Type> &t) {
+
+        std::string result;
+
+        if (!t.Empty()) {
+
+            result += std::to_string(t.value);
+
+            if (!t.unique) {
+
+                result += " : [";
+
+                for (Tree c : t.childrens) {
+                    
+                    if (!c.unique) {
+                        
+                        result += MakeString(c) + ", ";
+
+                    } else {
+
+                        result += std::to_string(c.value) + ", ";
+
+                    }
+
+                }
+
+                result.pop_back();
+                result.pop_back();
+
+                result.push_back(']');
+
+            }
+
+        }
+
+        return result;
+
+    }
+
     friend bool operator==(const Tree &l, const Tree &r) {
 
         return l.value == r.value && l.childrens == r.childrens && l.parent == r.parent;
@@ -342,12 +409,82 @@ template <typename Type> class Tree {
     friend std::istream& operator>>(const std::string &s, const Tree &t) {
 
         assert(!"Not implement");
+        /*
+        
+        [] = Empty
+        [1] = unique
+
+        [1 : [2, 3, 4]] =
+            1
+           /|\
+          2 3 4
+
+        [1 : [2 : [5, -6], 3, 4]] =
+             1
+           / | \
+          2  3  4
+         / \
+        5  -6
+        
+        */
 
     }
 
-    friend std::ostream& operator<<(const Tree &l, const Tree &r) {
+    friend std::ostream& operator<<(std::ostream &flux, const Tree &t) {
 
-        assert(!"Not implement");
+        if (!t.Empty()) {
+
+            if (t.unique) {
+
+                flux << t.value;
+
+            } else {
+
+                const std::size_t totalHeight{t.Height()};
+
+                std::size_t sum{0};
+                for (std::size_t i{0}; i < t.Height(); i++) sum += i;
+                for (std::size_t i{0}; i < sum; i++) flux << ' ';
+
+                sum--;
+
+                flux << t.value << std::endl;
+
+                for (std::size_t i{0}; i < sum; i++) flux << ' ';
+
+                for (std::size_t i{0}; i < t.childrens.size(); i++) {
+
+                    for (std::size_t j{0}; j < t.Height()-totalHeight; j++) flux << ' ';
+
+                    if (i < t.childrens.size()/2) {
+
+                        flux << '/';
+
+                    } else if (i == t.childrens.size()/2) {
+
+                        flux << '|';
+
+                    } else {
+
+                        flux << '\\';
+
+                    }
+
+                }
+
+                for (Tree c : t.childrens) {
+
+
+
+                }
+
+                // Work in progress
+
+            }
+
+        }
+
+        return flux;
 
     }
 
