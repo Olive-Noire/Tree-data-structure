@@ -96,7 +96,31 @@ template <typename Type> class Tree {
 
     template <typename Lambda> void ForEachGeneration(Lambda function, std::size_t generation) const {
 
-        assert(!"Not implement");
+        assert(generation < Height() && "Generation index over range");
+
+        std::queue<Tree> order;
+        order.push(*this);
+
+        std::size_t distance{0}, count{1};
+
+        while (!order.empty()) {
+
+            if (distance == generation) function(order.front().value);
+            for (Tree t : order.front().childrens) order.push(t);
+
+            std::size_t temp{order.front().childrens.size()};
+
+            order.pop();
+            count--;
+
+            if (count == 0) {
+
+                distance++;
+                count = temp;
+
+            }
+
+        }
 
     }
 
@@ -289,9 +313,13 @@ template <typename Type> class Tree {
 
     friend std::vector<Type> MakeVectorGeneration(const Tree<Type> &t, std::size_t generation) {
 
-        std::vector<Type> result{};
+        std::vector<Type> result;
 
-        assert(!"Not implement");
+        t.ForEachGeneration([&result](Type t) -> void {
+
+            result.push_back(t);
+
+        }, generation);
 
         return result;
 
@@ -310,6 +338,12 @@ template <typename Type> class Tree {
 
     Tree& operator=(const Tree&) = default;
     Tree& operator=(Tree&&) noexcept = default;
+
+    friend std::istream& operator>>(const std::string &s, const Tree &t) {
+
+        assert(!"Not implement");
+
+    }
 
     friend std::ostream& operator<<(const Tree &l, const Tree &r) {
 

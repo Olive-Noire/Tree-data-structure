@@ -35,6 +35,10 @@ int main() {
     std::cout << "\nLe premier nombre positif est : " << test.FirstHasProperty([](int i) -> bool { return i > 0; });
     std::cout << "\nLe dernier nombre positif est : " << test.LastHasProperty([](int i) -> bool { return i > 0; });
 
+    std::cout << "\nVoici la derniere generation de l'arbre : \n";
+    test.ForEachGeneration([](int i) -> void { std::cout << i << ' '; }, test.Height()-1);
+    std::cout << std::endl;
+
     std::cin.get();
 
     return 0;
