@@ -3,7 +3,7 @@
 
 #include <cassert>
 #include <memory>
-#include <vector>
+#include <queue>
 #include <stack>
 
 template <typename Type> class Tree {
@@ -81,31 +81,17 @@ template <typename Type> class Tree {
 
     template <typename Lambda> void ForEachWidth(Lambda function) const {
 
-        std::stack<Tree> current;
-        std::vector<Tree> nexts;
+        std::queue<Tree> order;
+        order.push(*this);
 
-        function(value);
-        current.push(*this);
+        while (!order.empty()) {
 
-        do {
+            function(order.front().value);
+            for (Tree t : order.front().childrens) order.push(t);
 
-            while (!nexts.empty()) {
+            order.pop();
 
-                function(nexts[0].value);
-
-                current.push(nexts[0]);
-                nexts.erase(nexts.begin());
-
-            }
-
-            while (!current.empty()) {
-
-                for (Tree c : current.top().childrens) nexts.push_back(c);
-                current.pop();
-
-            }
-
-        } while (!nexts.empty());
+        }
 
     }
 
