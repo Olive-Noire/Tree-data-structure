@@ -4,7 +4,6 @@
 #include <cassert>
 #include <memory>
 #include <queue>
-#include <stack>
 
 template <typename Type> class Tree {
 
@@ -84,12 +83,30 @@ template <typename Type> class Tree {
         std::queue<Tree> order;
         order.push(*this);
 
+        std::size_t distance{0}, count{1};
+
         while (!order.empty()) {
 
+            std::cout << "\nvaleur : " << order.front().value << "\ndistance : " << distance << std::endl;
+
             function(order.front().value);
-            for (Tree t : order.front().childrens) order.push(t);
+            for (Tree t : order.front().childrens) {
+                
+                order.push(t);
+
+            }
+
+            std::size_t temp{order.front().childrens.size()};
 
             order.pop();
+            count--;
+
+            if (count == 0) {
+
+                distance++;
+                count = temp;
+
+            }
 
         }
 
@@ -197,6 +214,14 @@ template <typename Type> class Tree {
         return result;
 
     }
+
+    friend bool operator==(const Tree &l, const Tree &r) {
+
+        return l.value == r.value && l.childrens == r.childrens && l.parent == r.parent;
+
+    }
+
+    friend bool operator!=(const Tree &l, const Tree &r) { return !(l == r); }
 
     const Tree& operator[](std::size_t index) const { return childrens[index]; }
     Tree& operator[](std::size_t index) { return childrens[index]; }
