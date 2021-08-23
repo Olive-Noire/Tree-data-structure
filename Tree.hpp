@@ -78,7 +78,7 @@ template <typename Type> class Tree {
 
     }
 
-    template <typename Lambda> void ForEachWidth(Lambda function) const {
+    template <typename Lambda> void ForEachBFS(Lambda function) const {
 
         std::queue<Tree> order;
         order.push(*this);
@@ -97,7 +97,40 @@ template <typename Type> class Tree {
     bool Empty() const { return !unique && childrens.empty() && parent == nullptr; }
     bool Leaf() const { return childrens.empty() && parent != nullptr; }
     bool Root() const { return !childrens.empty() && parent == nullptr; }
-    bool Branche() const { return !childrens.empty() && parent != nullptr; } 
+    bool Branche() const { return !childrens.empty() && parent != nullptr; }
+
+    template <typename Lambda> bool AllHasProperty(Lambda property) const {
+
+        bool temp{true};
+
+        ForEach([property, &temp](Type t) -> void {
+
+            if (!property(t)) {
+                
+                temp = false;
+                return;
+
+            }
+
+        });
+
+        return temp;
+
+    }
+
+    template <typename Lambda> bool OnceHasProperty(Lambda property) const {
+
+        bool temp{false};
+
+        ForEach([property, &temp](Type t) -> void {
+
+            if (!temp && property(t)) temp = true;
+
+        });
+
+        return temp;
+
+    }
 
     std::size_t Size() const {
 
@@ -178,6 +211,43 @@ template <typename Type> class Tree {
 
     }
 
+    template<typename Lambda> Type FirstHasProperty(Lambda property) const {
+
+        assert(OnceHasProperty(property) && "Tree not have this property");
+
+        Type first;
+        bool end{false};
+
+        ForEachBFS([property, &first, &end](Type t) -> void {
+
+            if (!end && property(t)) {
+                
+                first = t;
+                end = true;
+
+            }
+
+        });
+
+        return first;
+
+    }
+
+    template<typename Lambda> Type LastHasProperty(Lambda property) const {
+
+        assert(OnceHasProperty(property) && "Tree not have this property");
+
+        Type last;
+        ForEachBFS([property, &last](Type t) -> void {
+
+            if (property(t)) last = t;
+
+        });
+
+        return last;
+
+    }
+
     friend std::vector<Type> MakeVector(const Tree<Type> &t) {
 
         std::vector<Type> result;
@@ -193,6 +263,20 @@ template <typename Type> class Tree {
         }
         
         result.insert(result.begin(), t.value);
+        return result;
+
+    }
+
+    friend std::vector<Type> MakeVectorBFS(const Tree<Type> &t) {
+
+        std::vector<Type> result;
+
+        t.ForEachBFS([](Type t) -> void {
+
+            result.push_back(t);
+
+        });
+
         return result;
 
     }

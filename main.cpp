@@ -9,7 +9,7 @@ int main() {
     test.Push(3);
     test.Push(4);
     test[0].Push(5);
-    test[0].Push(6);
+    test[0].Push(-6);
 
     std::cout << test[0].Get() << ' ' << test.Size() << ' ' << test.Height();
 
@@ -27,8 +27,13 @@ int main() {
     std::cout << test.Generation() << ' ' << test.GetMost([](int l, int r) -> bool { return l > r; });
 
     std::cout << "\nVoici l'arbre en largueur : \n";
-    test.ForEachWidth([](int i) -> void { std::cout << i << ' '; });
+    test.ForEachBFS([](int i) -> void { std::cout << i << ' '; });
     std::cout << std::endl;
+
+    std::cout << "Tout les nombres sont positifs : " << test.AllHasProperty([](int i) -> bool { return i > 0; });
+    std::cout << "\nAu moins un nombre est negatif : " << test.OnceHasProperty([](int i) -> bool { return i < 0; });
+    std::cout << "\nLe premier nombre positif est : " << test.FirstHasProperty([](int i) -> bool { return i > 0; });
+    std::cout << "\nLe dernier nombre positif est : " << test.LastHasProperty([](int i) -> bool { return i > 0; });
 
     std::cin.get();
 
