@@ -94,6 +94,12 @@ template <typename Type> class Tree {
 
     }
 
+    template <typename Lambda> void ForEachGeneration(Lambda function, std::size_t generation) const {
+
+        assert(!"Not implement");
+
+    }
+
     bool Empty() const { return !unique && childrens.empty() && parent == nullptr; }
     bool Leaf() const { return childrens.empty() && parent != nullptr; }
     bool Root() const { return !childrens.empty() && parent == nullptr; }
@@ -271,11 +277,21 @@ template <typename Type> class Tree {
 
         std::vector<Type> result;
 
-        t.ForEachBFS([](Type t) -> void {
+        t.ForEachBFS([&result](Type t) -> void {
 
             result.push_back(t);
 
         });
+
+        return result;
+
+    }
+
+    friend std::vector<Type> MakeVectorGeneration(const Tree<Type> &t, std::size_t generation) {
+
+        std::vector<Type> result{};
+
+        assert(!"Not implement");
 
         return result;
 
@@ -294,6 +310,12 @@ template <typename Type> class Tree {
 
     Tree& operator=(const Tree&) = default;
     Tree& operator=(Tree&&) noexcept = default;
+
+    friend std::ostream& operator<<(const Tree &l, const Tree &r) {
+
+        assert(!"Not implement");
+
+    }
 
     private:
 
